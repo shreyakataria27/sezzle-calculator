@@ -2,6 +2,8 @@
 
 A full-stack calculator application with a Java Spring Boot backend and a React TypeScript frontend. Supports full mathematical expressions with BODMAS operator precedence and bracket support.
 
+![Sezzle Calculator](screenshot.png)
+
 ## Features
 
 - Full expression input with BODMAS evaluation (e.g., `3 + 4 * 2 = 11`)
