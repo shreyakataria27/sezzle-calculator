@@ -23,15 +23,10 @@ body {
 }
 
 .calculator-wrapper {
+  position: relative;
   display: flex;
-  gap: 1.5rem;
   align-items: flex-start;
   justify-content: center;
-  transition: transform 0.35s ease;
-}
-
-.calculator-wrapper.history-open {
-  transform: translateX(-30%);
 }
 
 .calculator {
@@ -68,6 +63,10 @@ body {
   background: rgba(167, 139, 250, 0.1);
 }
 
+.history-toggle:focus {
+  outline: none;
+}
+
 .history-toggle-active {
   color: #a78bfa;
 }
@@ -78,12 +77,25 @@ body {
   border-radius: 12px;
   padding: clamp(0.6rem, 2vw, 1rem) clamp(0.75rem, 2.5vw, 1.25rem);
   margin-bottom: 1rem;
-  min-height: clamp(60px, 15vw, 80px);
+  min-height: clamp(80px, 20vw, 100px);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: flex-end;
   overflow: hidden;
+}
+
+.display-last-entry {
+  width: 100%;
+  text-align: right;
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  color: #5a6a8a;
+  margin-bottom: 0.25rem;
+}
+
+.display-current {
+  width: 100%;
+  text-align: right;
 }
 
 .display-result {
@@ -199,24 +211,18 @@ body {
 
 /* History Panel */
 .history {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-left: 1rem;
   background: #16213e;
   border-radius: 16px;
   padding: 1rem 1.25rem;
-  width: min(240px, 80vw);
-  max-height: 450px;
+  width: 240px;
+  height: 450px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  animation: slide-in 0.3s ease;
-}
-
-@keyframes slide-in {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  display: flex;
+  flex-direction: column;
 }
 
 .history-header {
@@ -228,7 +234,12 @@ body {
   color: #a78bfa;
 }
 
-.history-clear {
+.history-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.history-action-btn {
   background: none;
   border: none;
   color: #8b9dc3;
@@ -237,14 +248,26 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-.history-clear:hover {
+.history-action-btn:hover {
   color: #f87171;
+}
+
+.history-action-btn:focus {
+  outline: none;
+}
+
+.history-empty {
+  color: #5a6a8a;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1rem 0;
 }
 
 .history-list {
   list-style: none;
   overflow-y: auto;
-  max-height: 380px;
+  flex: 1;
+  min-height: 0;
 }
 
 .history-entry {
@@ -260,24 +283,96 @@ body {
 
 /* Mobile */
 @media (max-width: 640px) {
-  .calculator-wrapper {
-    flex-direction: column;
-    align-items: center;
+  .app {
+    padding: 0;
+    justify-content: stretch;
+    height: 100dvh;
+    overflow: hidden;
   }
 
-  .calculator-wrapper.history-open {
-    transform: none;
+  .calculator-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    flex: 1;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .calculator {
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0.75rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .display {
+    border-radius: 8px;
+    min-height: 30dvh;
+    padding: 1rem;
+    justify-content: flex-end;
+    flex-shrink: 1;
+  }
+
+  .display-result {
+    font-size: 1.1rem;
+  }
+
+  .display-expression {
+    font-size: 2rem;
+  }
+
+  .button-grid {
+    gap: 0.35rem;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .calc-btn {
+    font-size: 1.25rem;
+  }
+
+  .btn-equals {
+    font-size: 1.4rem;
+  }
+
+  .calculator-wrapper:has(.history) .display {
+    min-height: 8dvh;
+    padding: 0.5rem 1rem;
+  }
+
+  .calculator-wrapper:has(.history) .display-expression {
+    font-size: 1.4rem;
+  }
+
+  .calculator-wrapper:has(.history) .calc-btn {
+    min-height: 32px;
+    font-size: 1rem;
+  }
+
+  .calculator-wrapper:has(.history) .btn-equals {
+    font-size: 1.1rem;
   }
 
   .history {
-    width: min(90vw, 360px);
+    position: static;
+    margin-left: 0;
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    height: 35dvh;
+    flex-shrink: 0;
   }
 }
 
 /* Landscape on short screens */
 @media (max-height: 500px) {
   .app {
-    padding: 0.5rem;
+    padding: 0;
   }
 
   .display {
@@ -296,9 +391,5 @@ body {
 
   .calculator {
     padding: 0.5rem;
-  }
-
-  .calculator-toolbar {
-    margin-bottom: 0.25rem;
   }
 }

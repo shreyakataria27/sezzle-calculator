@@ -173,6 +173,31 @@ class ExpressionEvaluatorTest {
         assertThrows(CalculatorException.class, () -> evaluator.evaluate("3 & 4"));
     }
 
+    @Test
+    void implicitMultiplyNumberBeforeFunction() {
+        assertEquals(16.97056274461, evaluator.evaluate("12sqrt(2)"), 1e-5);
+    }
+
+    @Test
+    void implicitMultiplyNumberBeforeBracket() {
+        assertEquals(14.0, evaluator.evaluate("2(3+4)"));
+    }
+
+    @Test
+    void implicitMultiplyBracketBeforeNumber() {
+        assertEquals(14.0, evaluator.evaluate("(3+4)2"));
+    }
+
+    @Test
+    void implicitMultiplyBracketBeforeBracket() {
+        assertEquals(12.0, evaluator.evaluate("(3)(4)"));
+    }
+
+    @Test
+    void implicitMultiplyBracketBeforeFunction() {
+        assertEquals(12.0, evaluator.evaluate("(4)sqrt(9)"));
+    }
+
     @ParameterizedTest
     @CsvSource({
             "'1 + 2 + 3 + 4', 10.0",

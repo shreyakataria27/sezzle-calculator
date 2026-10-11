@@ -1,16 +1,21 @@
 interface DisplayProps {
   expression: string;
-  value: string;
   error: string;
+  lastEntry: string;
 }
 
-function Display({ expression, value, error }: DisplayProps) {
+function Display({ expression, error, lastEntry }: DisplayProps) {
   return (
     <div className="display">
-      <div className={`display-result ${error ? 'display-error' : ''}`}>
-        {error || value || '0'}
+      {lastEntry && (
+        <div className="display-last-entry">{lastEntry}</div>
+      )}
+      <div className="display-current">
+        {error && (
+          <div className="display-error">{error}</div>
+        )}
+        <div className="display-expression">{expression || ' '}</div>
       </div>
-      <div className="display-expression">{expression || ' '}</div>
     </div>
   );
 }

@@ -36,7 +36,6 @@ const KEY_TO_LABEL: Record<string, string> = {
 
 function Calculator() {
   const [expression, setExpression] = useState('0');
-  const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,10 +43,12 @@ function Calculator() {
   const [showHistory, setShowHistory] = useState(false);
   const [justEvaluated, setJustEvaluated] = useState(false);
 
+  const [showLastEntry, setShowLastEntry] = useState(true);
+
   const reset = useCallback(() => {
     setExpression('0');
-    setResult('');
     setError('');
+    setShowLastEntry(false);
     setJustEvaluated(false);
   }, []);
 
@@ -55,16 +56,22 @@ function Calculator() {
     setError('');
     if (justEvaluated) {
       setExpression(value);
-      setResult('');
-      setJustEvaluated(false);
+        setJustEvaluated(false);
     } else {
       setExpression((prev) => (prev === '0' ? value : prev + value));
     }
   }, [justEvaluated]);
 
+  const hasMaxDecimals = useCallback((expr: string) => {
+    const lastNumber = expr.split(/[+\-*\/^%()]/).pop() || '';
+    const dotIndex = lastNumber.indexOf('.');
+    return dotIndex !== -1 && lastNumber.length - dotIndex > 7;
+  }, []);
+
   const handleDigit = useCallback((digit: string) => {
+    if (!justEvaluated && hasMaxDecimals(expression)) return;
     appendToExpression(digit);
-  }, [appendToExpression]);
+  }, [appendToExpression, justEvaluated, expression, hasMaxDecimals]);
 
   const handleDecimal = useCallback(() => {
     appendToExpression('.');
@@ -73,20 +80,15 @@ function Calculator() {
   const handleOperator = useCallback((displayOp: string) => {
     setError('');
     const apiOp = OPERATOR_MAP[displayOp] ?? displayOp;
-    if (justEvaluated) {
-      setExpression(result + apiOp);
-      setJustEvaluated(false);
-    } else {
-      setExpression((prev) => prev + apiOp);
-    }
-  }, [justEvaluated, result]);
+    setExpression((prev) => prev + apiOp);
+    setJustEvaluated(false);
+  }, []);
 
   const handleBracket = useCallback((bracket: string) => {
     setError('');
     if (justEvaluated) {
       setExpression(bracket);
-      setResult('');
-      setJustEvaluated(false);
+        setJustEvaluated(false);
     } else {
       setExpression((prev) => (prev === '0' ? bracket : prev + bracket));
     }
@@ -96,8 +98,7 @@ function Calculator() {
     setError('');
     if (justEvaluated) {
       setExpression('sqrt(');
-      setResult('');
-      setJustEvaluated(false);
+        setJustEvaluated(false);
     } else {
       setExpression((prev) => (prev === '0' ? 'sqrt(' : prev + 'sqrt('));
     }
@@ -125,7 +126,8 @@ function Calculator() {
     try {
       const response = await evaluate(expr);
       setHistory((prev) => [response.expression, ...prev].slice(0, 20));
-      setResult(String(response.result));
+      setExpression(String(response.result));
+      setShowLastEntry(true);
       setJustEvaluated(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Evaluation failed');
@@ -186,7 +188,7 @@ function Calculator() {
     .replace(/-/g, '−');
 
   return (
-    <div className={`calculator-wrapper ${showHistory && history.length > 0 ? 'history-open' : ''}`}>
+    <div className="calculator-wrapper">
       <div className="calculator">
         <div className="calculator-toolbar">
           <button
@@ -201,7 +203,7 @@ function Calculator() {
             <span>History</span>
           </button>
         </div>
-        <Display expression={displayExpression || ' '} value={result} error={error} />
+        <Display expression={displayExpression || ' '} error={error} lastEntry={showLastEntry ? (history[0] ?? '') : ''} />
 
         <div className="button-grid">
           <Button label="C" onClick={reset} className="btn-clear" isActive={activeKey === 'C'} />
@@ -238,7 +240,13 @@ function Calculator() {
         </div>
       </div>
 
-      {showHistory && <History entries={history} onClear={() => setHistory([])} />}
+      {showHistory && (
+        <History
+          entries={history}
+          onClear={() => setHistory([])}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
     </div>
   );
 }

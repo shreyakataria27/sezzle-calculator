@@ -32,9 +32,10 @@ public class CalculatorController {
 
     private String formatResult(double value) {
         if (Double.isNaN(value) || Double.isInfinite(value)) return "Undefined";
-        if (value == Math.floor(value)) {
+        if (value == Math.floor(value) && Math.abs(value) < Long.MAX_VALUE) {
             return String.valueOf((long) value);
         }
-        return String.valueOf(value);
+        String formatted = String.format("%.7f", value).replaceAll("0+$", "").replaceAll("\\.$", "");
+        return formatted;
     }
 }

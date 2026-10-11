@@ -1,22 +1,30 @@
 interface HistoryProps {
   entries: string[];
   onClear: () => void;
+  onClose: () => void;
 }
 
-function History({ entries, onClear }: HistoryProps) {
-  if (entries.length === 0) return null;
-
+function History({ entries, onClear, onClose }: HistoryProps) {
   return (
     <div className="history">
       <div className="history-header">
         <span>History</span>
-        <button className="history-clear" onClick={onClear}>Clear</button>
+        <div className="history-actions">
+          {entries.length > 0 && (
+            <button className="history-action-btn" onClick={onClear}>Clear</button>
+          )}
+          <button className="history-action-btn" onClick={onClose}>Close</button>
+        </div>
       </div>
-      <ul className="history-list">
-        {entries.map((entry, i) => (
-          <li key={i} className="history-entry">{entry}</li>
-        ))}
-      </ul>
+      {entries.length === 0 ? (
+        <div className="history-empty">No calculations yet</div>
+      ) : (
+        <ul className="history-list">
+          {entries.map((entry, i) => (
+            <li key={i} className="history-entry">{entry}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

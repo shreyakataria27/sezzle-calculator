@@ -40,10 +40,12 @@ public class ExpressionEvaluator {
             char c = expr.charAt(i);
 
             if (Character.isDigit(c) || c == '.') {
+                insertImplicitMultiply(tokens);
                 int start = i;
                 tokens.add(parseNumber(expr, start));
                 i = advancePastNumber(expr, start);
             } else if (Character.isLetter(c)) {
+                insertImplicitMultiply(tokens);
                 StringBuilder func = new StringBuilder();
                 while (i < expr.length() && Character.isLetter(expr.charAt(i))) {
                     func.append(expr.charAt(i));
@@ -54,8 +56,12 @@ public class ExpressionEvaluator {
                     throw new CalculatorException("Unknown function: " + name);
                 }
                 tokens.add(name);
-            } else if (c == '(' || c == ')') {
-                tokens.add(String.valueOf(c));
+            } else if (c == '(') {
+                insertImplicitMultiply(tokens);
+                tokens.add("(");
+                i++;
+            } else if (c == ')') {
+                tokens.add(")");
                 i++;
             } else if (c == '-') {
                 boolean isUnary = tokens.isEmpty()
@@ -66,6 +72,7 @@ public class ExpressionEvaluator {
                     if (i >= expr.length() || (!Character.isDigit(expr.charAt(i)) && expr.charAt(i) != '.')) {
                         throw new CalculatorException("Invalid expression: unexpected '-'");
                     }
+                    insertImplicitMultiply(tokens);
                     int start = i;
                     tokens.add("-" + parseNumber(expr, start));
                     i = advancePastNumber(expr, start);
@@ -85,6 +92,14 @@ public class ExpressionEvaluator {
             throw new CalculatorException("Expression is empty");
         }
         return tokens;
+    }
+
+    private void insertImplicitMultiply(List<String> tokens) {
+        if (tokens.isEmpty()) return;
+        String last = tokens.getLast();
+        if (isNumber(last) || last.equals(")")) {
+            tokens.add("*");
+        }
     }
 
     List<String> toPostfix(List<String> tokens) {
